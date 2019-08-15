@@ -47,3 +47,4 @@ function sendEmail(from, to, body, subject) {
 $(document).ready(function () {
     SP.SOD.executeFunc('sp.js', 'SP.ClientContext', processSendEmails);
 });
+
