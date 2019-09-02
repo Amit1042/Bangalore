@@ -1,0 +1,104 @@
+var selchk;
+var array=[];
+var srn=0;
+function LatestProjectList(logicfilter) 
+{  debugger;
+	var siteUrl = _spPageContextInfo.webAbsoluteUrl;
+   	var oDataUrl = siteUrl + logicfilter;//"/_api/lists/getbytitle('QMRmaster')/items?$orderby=ID desc&$top=10";
+    $.ajax({  
+            url: oDataUrl,  
+            type: "GET",  
+            dataType: "json",  
+            headers: {"accept": "application/json;odata=verbose"},  
+            success: mySuccHandler,  
+            error: myErrHandler  
+            });         
+    	}
+    function mySuccHandler(data) {  
+    try {   
+    var table = $('#proj_info').DataTable({
+    "destroy": true,
+    "bFilter": false,
+    "searching": true,
+    //"iDisplayLength": 10,
+    "dom": 'Bfrtip',
+    "autoWidth": false,
+    "buttons":[ ,
+    			/*{
+		            extend: 'print',
+                    title: 'Project Management Office',
+                    orientation: 'landscape',
+                    messageTop: 'The information is copyright to TMG.'
+                }
+                ,
+               	{   
+               		extend: 'pdf',
+                    title: 'Project Management Office',
+                    orientation: 'landscape',
+                    messageTop: 'The information in this Report is copyright to TMG.'  
+                    
+                }*/
+                
+            ],
+           
+    	"aaData": data.d.results,
+    	"columnDefs": [
+        {
+            "targets": [1],
+            "visible": false,
+            "searchable": false
+        }
+    ],  
+    	"aoColumns": [{
+    		"mData": "Title",
+    		"render": function (data, type, full, meta) {
+               	return '<a href=../SitePages/PMO-UI.aspx?p='+window.btoa(data)+'><input type="checkbox" name="PR_ID" class="chk" value="' +data+ '" style="width: 20px;"></a>';
+            	}
+    		 },{
+    		"mData": "ID" },{
+         	"mData": "Title",
+         	"render": function (data, type, full, meta) {
+               	return '<a target="_blank" href=../SitePages/QA-Report.aspx?p=' +window.btoa(data)+ '>' +data+ '</a>';
+            	}
+
+         	
+         	 },{  
+         	"mData": "Project_Title"},{
+         	"mData": "Project_Date"},{
+         	"mData": "PARENT_ID",
+ 
+           	"render": function (data, type, full, meta) {
+               	return '<a target="_blank" href=#?c=' +window.btoa(data)+ '><i style="font-size:24px" class="fa">&#xf0ea;</i></a>&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" href=#?pdf=' +window.btoa(data)+ '><i style="font-size:24px; color:red" class="fa">&#xf1c1;</i></a>';
+            	}}]            
+       }); 
+       
+       
+       $(document).on('change', ':checkbox', function () {
+       var count=0; var temp; array=[];       
+       var rowcollection =  table.$(".chk:checked", {"page": "all"});
+			rowcollection.each(function(index,elem){
+				temp = Object.values(rowcollection);
+				var checkbox_value = $(elem).val();
+				array.push(checkbox_value);   
+    		});
+		if(rowcollection.length>5)
+    		{
+    		alert("WARNING: YOU CAN SEND ONLY 5 DOCUMENTS IN ONE TIME!");$(this).attr('checked', false);
+    		} 
+       selchk=array;
+       return selchk;
+       
+  });      
+      
+ } 
+       catch (e) { }  
+}  
+  
+  
+  
+function myErrHandler(data, errMessage) 
+	{ 
+		alert("NO RECORD FOUND CREATED BY YOU.");  
+	}
+
+
