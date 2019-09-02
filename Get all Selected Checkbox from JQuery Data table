@@ -1,0 +1,12 @@
+ $(document).on('change', ':checkbox', function () {
+       var count=0; var temp; array=[];       
+       var rowcollection =  table.$(".chk:checked", {"page": "all"});
+			rowcollection.each(function(index,elem){
+				temp = Object.values(rowcollection);
+				var checkbox_value = $(elem).val();
+				array.push(checkbox_value);   
+    		});
+		if(rowcollection.length>5)
+    		{
+    		alert("WARNING: YOU CAN SEND ONLY 5 DOCUMENTS IN ONE TIME!");$(this).attr('checked', false);
+    		} 
