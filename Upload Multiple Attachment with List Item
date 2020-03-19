@@ -1,50 +1,80 @@
-var listName = "MailTriger";
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<div id="drop-zone">
+  <div id="clickHere">or click here.. <i class="fa fa-upload"></i>
+    <input type="file" name="file" id="FileUpload" multiple />
+  </div>
+  <div id='filename' onclick=""></div>
+</div>
+<input type="button" value="UploadInList" onclick="UploadDocuments()">
+
+  
+<script type="text/javascript">
+var dropZoneId = "drop-zone";
+var dropZone = $("#" + dropZoneId);
+var inputFile = dropZone.find("input");
+var finalFiles = {};
+
+$(function() {
+  inputFile.on('change', function(e) {
+  finalFiles = {};
+  $('#filename').html("");
+  var fileNum = this.files.length,
+  initial = 0, counter = 0;
+  $.each(this.files,function(idx,elm){
+       finalFiles[idx]=elm;
+    });
+
+  for (initial; initial < fileNum; initial++) {
+  counter = counter + 1;
+  $('#filename').append('<div id="file_'+ initial +'"><span class="fa-stack fa-lg"><i class="fa fa-file fa-stack-1x "></i><strong class="fa-stack-1x" style="color:#FFF; font-size:12px; margin-top:2px;">' + counter + '</strong></span> ' + this.files[initial].name + '&nbsp;&nbsp;<span class="fa fa-times-circle fa-lg closeBtn"  onclick="removeLine(this.id);" id="file_'+ initial +'"" title="remove"></span></div>');
+  }
+  });
+})
+
+function removeLine(id)
+{ 
+  var index = id.split('_')[1];
+  $("#"+id).remove();
+  delete finalFiles[index];
+}
+
+</script>
+<script>
+
+var listName = "EmailSender";
 var siteUrl = _spPageContextInfo.webAbsoluteUrl;
 var xRequestDigest = $("#__REQUESTDIGEST").val();
             
-function MailTr()
-{
-	debugger;
-    var Toemail = $('#To_Email').val();
-	var subject = $('#Email_Subject').val();
-	var attach = $('#attachment').val();
-    
-	if(Toemail !== "" && subject !== "" && attach !== ""  )
-	{
-		var FirstName = JSON.stringify  ({  
-    	__metadata: { type: "SP.Data.MailTrigerListItem" },  
-    	Title: $('#To_Email').val(),
-        CC_ID: $('#Cc_Email').val(),
-        Subject: $('#Email_Subject').val()
+function UploadDocuments()
+{	
+  var FirstName = JSON.stringify  ({  
+      __metadata: { type: "SP.Data.EmailSenderListItem" },  
+    	  Title: "Test1 Attachment",
+        Subject: "Test2 Subject"
         });
         
-        $.ajax({
-        	url: siteUrl + "/_api/lists/getbytitle('" + listName + "')/items",
-            method: "POST",
-            data: FirstName,
-            async: false,
-            headers:{
-                        "Accept": "application/json;odata=verbose",
-                        "Content-Type": "application/json;odata=verbose",
-                        "X-RequestDigest": xRequestDigest
+      $.ajax({
+        url: siteUrl + "/_api/lists/getbytitle('" + listName + "')/items",
+        method: "POST",
+        data: FirstName,
+        async: false,
+          headers:{
+            "Accept": "application/json;odata=verbose",
+            "Content-Type": "application/json;odata=verbose",
+            "X-RequestDigest": xRequestDigest
 					},
-            success: function(data)
-            	{
-            		uploadattachment(data.d.ID);
-                	alert('E-MAIL SENT SUCCESSFULLY.');
-                },
-			error: function(data)
+        success: function(data)
+        {
+          uploadattachment(data.d.ID);
+          alert('Your Message Here');
+        },
+			  error: function(data)
 				{
-            		alert(data.responseText);
-                }
-                });
-	}
-    else
-    	{
-        	alert("PLEASE FILL THE MANDATORY  FIELDS !");
+          alert(data.responseText);
         }
-                
-}
+      });
+	}  
 
             
 var getFileBuffer = function (file) 
@@ -64,37 +94,34 @@ var getFileBuffer = function (file)
 		return deferred.promise();
 };
 
-function uploadattachment(id) {
-	debugger;
-    var files = $("#attachment")[0].files;
-    if (files.length > 0) 
-    {
-    	$.each(files, function(index, value){
-    	getFileBuffer(value).then(function (buffer) {
-    		$.ajax({
-    	    	url: siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items(" + id + ")/AttachmentFiles/add(FileName='" + value.name + "')",
-    	    	method: 'POST',
-    	        data: buffer,
-    	        async: false,
-    	        processData: false,
-    	        headers: 
-    	        	{
-    	        		"Accept": "application/json;odata=verbose",
-    	                "content-type": "application/json;odata=verbose",
-    	                "X-RequestDigest": xRequestDigest
-    	            },
-    	        success: function (data) 
-		            {
-						//alert("");            
-    	            },
-    	        error: function (data) 
-    	        	{
-    	       			console.log(data.responseText.error);
-    	                alert(data.responseText);
-    	            }
-    	        });
-    	     });
-    	  });
-  	}
+function uploadattachment(id) 
+{debugger;
+  //if (finalFiles.length > 0) 
+ // {
+    $.each(finalFiles, function(index, value){
+    getFileBuffer(value).then(function (buffer) {
+    $.ajax({
+      url: siteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items(" + id + ")/AttachmentFiles/add(FileName='" + value.name + "')",
+    	method: 'POST',
+    	data: buffer,
+    	async: false,
+    	processData: false,
+    	headers: 
+    	{
+    	  "Accept": "application/json;odata=verbose",
+    	  "content-type": "application/json;odata=verbose",
+    	  "X-RequestDigest": xRequestDigest
+    	},
+    	success: function (data){ },
+    	error: function (data) 
+    	{
+    	  console.log(data.responseText.error);
+    	  alert(data.responseText);
+    	}
+    	});
+    	});
+    	});
+ // }
 }
-            
+   
+</script>
